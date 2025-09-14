@@ -24,6 +24,7 @@ export interface Invoice {
   dueDate: string;
   items: InvoiceItem[];
   subtotal: number;
+  discount: number;
   tax: number;
   total: number;
   status: 'draft' | 'sent' | 'paid' | 'overdue';

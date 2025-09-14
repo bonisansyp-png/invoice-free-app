@@ -29,6 +29,7 @@ export const CreateInvoice = ({ onBack, editingInvoice }: CreateInvoiceProps) =>
   const [issueDate, setIssueDate] = useState(editingInvoice?.issueDate || new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState(editingInvoice?.dueDate || '');
   const [notes, setNotes] = useState(editingInvoice?.notes || '');
+  const [discount, setDiscount] = useState(editingInvoice?.discount || 0);
   const [items, setItems] = useState<InvoiceItem[]>(editingInvoice?.items || [
     { id: '1', description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
@@ -64,8 +65,10 @@ export const CreateInvoice = ({ onBack, editingInvoice }: CreateInvoiceProps) =>
   };
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + tax;
+  const discountAmount = subtotal * (discount / 100);
+  const afterDiscount = subtotal - discountAmount;
+  const tax = afterDiscount * 0.1; // 10% tax
+  const total = afterDiscount + tax;
 
   const handleSave = () => {
     if (!selectedClient || !dueDate || items.some(item => !item.description)) {
@@ -221,6 +224,12 @@ export const CreateInvoice = ({ onBack, editingInvoice }: CreateInvoiceProps) =>
               <span>Subtotal:</span>
               <span className="font-semibold">${subtotal.toFixed(2)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-success">
+                <span>Discount ({discount}%):</span>
+                <span className="font-semibold">-${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span>Tax (10%):</span>
               <span className="font-semibold">${tax.toFixed(2)}</span>
@@ -230,6 +239,24 @@ export const CreateInvoice = ({ onBack, editingInvoice }: CreateInvoiceProps) =>
               <span>${total.toFixed(2)}</span>
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 p-4 border border-border rounded-lg">
+          <Label htmlFor="discount">Discount (%)</Label>
+          <Input
+            id="discount"
+            type="number"
+            min="0"
+            max="100"
+            step="0.1"
+            value={discount}
+            onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+            placeholder="0"
+            className="mt-1"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Enter discount percentage (0-100%)
+          </p>
         </div>
       </Card>
 
