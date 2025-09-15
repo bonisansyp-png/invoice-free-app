@@ -71,10 +71,38 @@ export const CreateInvoice = ({ onBack, editingInvoice }: CreateInvoiceProps) =>
   const total = afterDiscount + tax;
 
   const handleSave = () => {
-    if (!selectedClient || !dueDate || items.some(item => !item.description)) {
+    // Enhanced validation
+    if (!selectedClient) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields",
+        description: "Please select a client",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!dueDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please set a due date",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (items.some(item => !item.description.trim())) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all item descriptions",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (items.some(item => item.quantity <= 0 || item.rate < 0)) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter valid quantities and rates",
         variant: "destructive",
       });
       return;
